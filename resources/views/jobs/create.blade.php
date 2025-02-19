@@ -30,6 +30,13 @@
                         </div>
                     </div>
                 </div>
+
+                @if($errors->any())
+                    <ul>
+                        @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    </ul>
+                @endif
             </div>
         </div>
 
