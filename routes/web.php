@@ -60,7 +60,7 @@ Route::get('/jobs/{id}/edit', function ($id) {
 
     // authorize (On hold...)
 
-    $job = Job::findOrFail(id);
+    $job = Job::findOrFail($id);
 
     $job->update([
         'title' => request('title'),
@@ -74,8 +74,7 @@ Route::get('/jobs/{id}/edit', function ($id) {
  Route::delete('/jobs/{id}', function ($id) {
     // authorize (On hold...)
 
-    Job::findOrFail($id);
-    $job->delete();
+    Job::findOrFail($id)->delete();
 
     return redirect('/jobs');
  });
