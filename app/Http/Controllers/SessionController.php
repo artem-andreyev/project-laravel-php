@@ -15,4 +15,11 @@ class SessionController extends Controller
     {
         dd(request()->all());
     }
+
+    public function destroy()
+    {
+        Auth::logout();
+
+        return redirect('/');
+    }
 }
