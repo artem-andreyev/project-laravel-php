@@ -16,7 +16,7 @@ class JobPosted extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct(public Job $job)
     {
         //
     }
@@ -28,6 +28,7 @@ class JobPosted extends Mailable
     {
         return new Envelope(
             subject: 'Job Posted',
+            from: 'admin@example.com'
         );
     }
 
