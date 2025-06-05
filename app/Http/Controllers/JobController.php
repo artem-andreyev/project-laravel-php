@@ -9,9 +9,19 @@ use App\Mail\JobPosted;
 
 class JobController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $jobs = Job::with('employer')->latest()->simplePaginate(3);
+        $query = Job::with('employer')->latest();
+
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('salary', 'like', '%' . $search . '%');
+            });
+        }
+
+        $jobs = $query->simplePaginate(3);
 
         return view('jobs.index', [
             'jobs' => $jobs
@@ -23,23 +33,25 @@ class JobController extends Controller
         return view('jobs.create');
     }
 
-
     public function show(Job $job)
     {
         return view('jobs.show', ['job' => $job]);
     }
 
-    public function store()
+    public function store(Request $request)
     {
-        request()->validate([
+        $validated = $request->validate([
             'title' => ['required', 'min:3'],
             'salary' => ['required']
         ]);
 
+        $employer = \App\Models\Employer::inRandomOrder()->first()
+            ?? \App\Models\Employer::factory()->create();
+
         $job = Job::create([
-            'title' => request('title'),
-            'salary' => request('salary'),
-            'employer_id' => 1
+            'title' => $validated['title'],
+            'salary' => $validated['salary'],
+            'employer_id' => $employer->id
         ]);
 
         Mail::to($job->employer->user)->queue(
@@ -54,27 +66,20 @@ class JobController extends Controller
         return view('jobs.edit', ['job' => $job]);
     }
 
-    public function update(Job $job)
+    public function update(Request $request, Job $job)
     {
-        // authorize (On hold...)
-
-        request()->validate([
+        $validated = $request->validate([
             'title' => ['required', 'min:3'],
             'salary' => ['required']
         ]);
 
-        $job->update([
-            'title' => request('title'),
-            'salary' => request('salary')
-        ]);
+        $job->update($validated);
 
         return redirect('/jobs/' . $job->id);
     }
 
     public function destroy(Job $job)
     {
-        // authorize (On hold...)
-
         $job->delete();
 
         return redirect('/jobs');
