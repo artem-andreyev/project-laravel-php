@@ -1,47 +1,94 @@
 <x-layout>
-    <x-slot:heading>
-        Create Internship
-    </x-slot:heading>
+    <x-slot:heading>Post a New Internship</x-slot:heading>
 
-    <form method="POST" action="/internships">
-        @csrf
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-xl border border-gray-200 p-8">
+            <h2 class="text-lg font-semibold text-gray-900 mb-1">Internship Details</h2>
+            <p class="text-sm text-gray-500 mb-6">Fill in the information below to post a new internship listing.</p>
 
-        <div class="space-y-12">
-            <div class="border-b border-gray-900/10 pb-12">
-                <h2 class="text-base/7 font-semibold text-gray-900">Create a New Internship</h2>
-                <p class="mt-1 text-sm/6 text-gray-600">We just need a few details about the internship position.</p>
+            <form method="POST" action="/internships">
+                @csrf
 
-                <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                    <x-form-field>
-                        <x-form-label for="title">Title</x-form-label>
-                        <div class="mt-2">
-                            <x-form-input name="title" id="title" placeholder="Software Development Intern" required/>
-                            <x-form-error name="title" />
-                        </div>
-                    </x-form-field>
+                <div class="space-y-5">
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Internship Title <span class="text-red-500">*</span></label>
+                        <input
+                            type="text"
+                            name="title"
+                            id="title"
+                            value="{{ old('title') }}"
+                            placeholder="e.g. Software Development Intern"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            required
+                        >
+                        @error('title')
+                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
 
-                    <x-form-field>
-                        <x-form-label for="duration">Duration (months)</x-form-label>
-                        <div class="mt-2">
-                            <x-form-input
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label for="duration" class="block text-sm font-medium text-gray-700 mb-1">Duration (months) <span class="text-red-500">*</span></label>
+                            <input
                                 type="number"
                                 name="duration"
                                 id="duration"
-                                placeholder="3"
+                                value="{{ old('duration') }}"
+                                placeholder="e.g. 3"
                                 min="1"
-                                max="12"
-                                required/>
-                            <x-form-error name="duration" />
+                                max="24"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                required
+                            >
+                            @error('duration')
+                                <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
-                    </x-form-field>
 
+                        <div>
+                            <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                            <input
+                                type="text"
+                                name="location"
+                                id="location"
+                                value="{{ old('location', 'Riga') }}"
+                                placeholder="e.g. Riga"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            >
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea
+                            name="description"
+                            id="description"
+                            rows="5"
+                            placeholder="Describe the internship, responsibilities, and what the intern will learn..."
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-y"
+                        >{{ old('description') }}</textarea>
+                        @error('description')
+                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="requirements" class="block text-sm font-medium text-gray-700 mb-1">Requirements</label>
+                        <textarea
+                            name="requirements"
+                            id="requirements"
+                            rows="4"
+                            placeholder="List required skills, courses, or qualifications..."
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-y"
+                        >{{ old('requirements') }}</textarea>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="mt-6 flex items-center justify-end gap-x-6">
-            <a href="/internships" class="text-sm/6 font-semibold text-gray-900">Cancel</a>
-            <x-form-button>Create</x-form-button>
+                <div class="mt-6 flex items-center justify-between">
+                    <a href="/internships" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition">Cancel</a>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition">Post Internship</button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </x-layout>
