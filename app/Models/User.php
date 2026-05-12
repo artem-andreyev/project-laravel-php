@@ -38,6 +38,21 @@ class User extends Authenticatable
         return $this->role === 'employer';
     }
 
+    public function isStudent(): bool
+    {
+        return $this->role === 'student';
+    }
+
+    public function isJobSeeker(): bool
+    {
+        return $this->role === 'job_seeker';
+    }
+
+    public function canPostListings(): bool
+    {
+        return in_array($this->role, ['employer', 'admin']);
+    }
+
     public function employer()
     {
         return $this->hasOne(Employer::class);
@@ -51,5 +66,18 @@ class User extends Authenticatable
     public function applications()
     {
         return $this->hasMany(Application::class);
+    }
+
+    public function savedListings()
+    {
+        return $this->hasMany(SavedListing::class);
+    }
+
+    public function hasSaved(string $type, int $id): bool
+    {
+        return $this->savedListings()
+            ->where('listing_type', $type)
+            ->where('listing_id', $id)
+            ->exists();
     }
 }

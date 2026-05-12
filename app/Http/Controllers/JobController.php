@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Job;
 use App\Models\Application;
+use App\Models\Employer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,27 +30,16 @@ class JobController extends Controller
             $query->where('location', 'like', '%' . $request->input('location') . '%');
         }
 
-        $jobs = $query->simplePaginate(6);
-
-        return view('jobs.index', [
-            'jobs' => $jobs,
-        ]);
+        return view('jobs.index', ['jobs' => $query->simplePaginate(6)]);
     }
 
     public function create()
     {
-        if (!Auth::check()) {
-            return redirect('/login');
-        }
         return view('jobs.create');
     }
 
     public function store(Request $request)
     {
-        if (!Auth::check()) {
-            return redirect('/login');
-        }
-
         $validated = $request->validate([
             'title'        => ['required', 'min:3'],
             'salary'       => ['required'],
@@ -61,67 +51,32 @@ class JobController extends Controller
         ]);
 
         $user = Auth::user();
-        $employer = $user->employer ?? \App\Models\Employer::inRandomOrder()->first()
-            ?? \App\Models\Employer::factory()->create();
+        $employer = $user->employer ?? Employer::inRandomOrder()->first() ?? Employer::factory()->create();
 
-        Job::create([
-            'title'        => $validated['title'],
-            'salary'       => $validated['salary'],
-            'description'  => $validated['description'] ?? null,
-            'location'     => $validated['location'] ?? 'Rīga',
-            'job_type'     => $validated['job_type'] ?? 'full-time',
-            'industry'     => $validated['industry'] ?? null,
-            'requirements' => $validated['requirements'] ?? null,
-            'employer_id'  => $employer->id,
-        ]);
+        Job::create(array_merge($validated, ['employer_id' => $employer->id]));
 
         return redirect('/jobs')->with('success', 'Job posted successfully!');
     }
 
     public function show(Job $job)
     {
-        $hasApplied = false;
-        if (Auth::check()) {
-            $hasApplied = Application::where('user_id', Auth::id())
-                ->where('listing_type', 'job')
-                ->where('listing_id', $job->id)
-                ->exists();
-        }
+        $hasApplied = Auth::check() && Application::where('user_id', Auth::id())
+            ->where('listing_type', 'job')
+            ->where('listing_id', $job->id)
+            ->exists();
 
-        return view('jobs.show', [
-            'job'        => $job,
-            'hasApplied' => $hasApplied,
-        ]);
+        return view('jobs.show', compact('job', 'hasApplied'));
     }
 
     public function edit(Job $job)
     {
-        if (!Auth::check()) {
-            return redirect('/login');
-        }
-
-        $user = Auth::user();
-        $isOwner = $user->employer && $user->employer->id === $job->employer_id;
-
-        if (!$user->isAdmin() && !$isOwner) {
-            abort(403, 'You do not have permission to edit this job.');
-        }
-
-        return view('jobs.edit', ['job' => $job]);
+        $this->authorizeOwner($job->employer_id);
+        return view('jobs.edit', compact('job'));
     }
 
     public function update(Request $request, Job $job)
     {
-        if (!Auth::check()) {
-            return redirect('/login');
-        }
-
-        $user = Auth::user();
-        $isOwner = $user->employer && $user->employer->id === $job->employer_id;
-
-        if (!$user->isAdmin() && !$isOwner) {
-            abort(403, 'You do not have permission to update this job.');
-        }
+        $this->authorizeOwner($job->employer_id);
 
         $validated = $request->validate([
             'title'        => ['required', 'min:3'],
@@ -140,19 +95,17 @@ class JobController extends Controller
 
     public function destroy(Job $job)
     {
-        if (!Auth::check()) {
-            return redirect('/login');
-        }
-
-        $user = Auth::user();
-        $isOwner = $user->employer && $user->employer->id === $job->employer_id;
-
-        if (!$user->isAdmin() && !$isOwner) {
-            abort(403, 'You do not have permission to delete this job.');
-        }
-
+        $this->authorizeOwner($job->employer_id);
         $job->delete();
-
         return redirect('/jobs')->with('success', 'Job deleted.');
+    }
+
+    private function authorizeOwner(int $employerId): void
+    {
+        $user = Auth::user();
+        $isOwner = $user->employer && $user->employer->id === $employerId;
+        if (!$user->isAdmin() && !$isOwner) {
+            abort(403);
+        }
     }
 }

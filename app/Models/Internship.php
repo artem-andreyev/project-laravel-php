@@ -17,4 +17,10 @@ class Internship extends Model
     {
         return $this->belongsTo(Employer::class);
     }
+
+    public function applications()
+    {
+        return $this->hasMany(Application::class, 'listing_id')
+            ->where('listing_type', 'internship');
+    }
 }

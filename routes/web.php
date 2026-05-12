@@ -8,17 +8,41 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\EmployerController;
+use App\Http\Controllers\EmployerDashboardController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CvController;
+use App\Http\Controllers\SavedListingController;
 
-// Home & Contact
 Route::view('/', 'home');
 Route::view('/contact', 'contact');
 
-// Jobs (public)
-Route::resource('jobs', JobController::class);
+// Jobs — public
+Route::get('/jobs', [JobController::class, 'index']);
+Route::get('/jobs/{job}', [JobController::class, 'show']);
 
-// Internships (public)
-Route::resource('internships', InternshipController::class);
+// Jobs — employer only
+Route::middleware(['auth', 'employer'])->group(function () {
+    Route::get('/jobs/create', [JobController::class, 'create']);
+    Route::post('/jobs', [JobController::class, 'store']);
+    Route::get('/jobs/{job}/edit', [JobController::class, 'edit']);
+    Route::put('/jobs/{job}', [JobController::class, 'update']);
+    Route::patch('/jobs/{job}', [JobController::class, 'update']);
+    Route::delete('/jobs/{job}', [JobController::class, 'destroy']);
+});
+
+// Internships — public
+Route::get('/internships', [InternshipController::class, 'index']);
+Route::get('/internships/{internship}', [InternshipController::class, 'show']);
+
+// Internships — employer only
+Route::middleware(['auth', 'employer'])->group(function () {
+    Route::get('/internships/create', [InternshipController::class, 'create']);
+    Route::post('/internships', [InternshipController::class, 'store']);
+    Route::get('/internships/{internship}/edit', [InternshipController::class, 'edit']);
+    Route::put('/internships/{internship}', [InternshipController::class, 'update']);
+    Route::patch('/internships/{internship}', [InternshipController::class, 'update']);
+    Route::delete('/internships/{internship}', [InternshipController::class, 'destroy']);
+});
 
 // Auth
 Route::get('/register', [RegisteredUserController::class, 'create']);
@@ -27,22 +51,34 @@ Route::get('/login', [SessionController::class, 'create']);
 Route::post('/login', [SessionController::class, 'store']);
 Route::post('/logout', [SessionController::class, 'destroy']);
 
-// Profile (auth required)
+// Auth required
 Route::middleware('auth')->group(function () {
+    // Profile & CV
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::get('/profile/edit', [ProfileController::class, 'edit']);
     Route::post('/profile', [ProfileController::class, 'update']);
+    Route::get('/cv/generate', [CvController::class, 'form']);
+    Route::post('/cv/generate', [CvController::class, 'generate']);
 
-    // Applications
+    // Applications (job seekers)
     Route::get('/applications', [ApplicationController::class, 'index']);
     Route::post('/applications', [ApplicationController::class, 'store']);
     Route::delete('/applications/{application}', [ApplicationController::class, 'destroy']);
 
-    // Employer profile
+    // Saved listings (job seekers / students)
+    Route::get('/saved', [SavedListingController::class, 'index']);
+    Route::post('/saved/toggle', [SavedListingController::class, 'toggle']);
+
+    // Employer setup
     Route::get('/employer/create', [EmployerController::class, 'create']);
     Route::post('/employer', [EmployerController::class, 'store']);
     Route::get('/employer/{employer}/edit', [EmployerController::class, 'edit']);
     Route::patch('/employer/{employer}', [EmployerController::class, 'update']);
+
+    // Employer dashboard
+    Route::get('/employer/dashboard', [EmployerDashboardController::class, 'index']);
+    Route::get('/employer/applications', [EmployerDashboardController::class, 'applications']);
+    Route::patch('/employer/applications/{application}/status', [EmployerDashboardController::class, 'updateStatus']);
 });
 
 // Admin panel
@@ -53,4 +89,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::delete('/users/{user}', [AdminController::class, 'deleteUser']);
     Route::get('/jobs', [AdminController::class, 'jobs']);
     Route::delete('/jobs/{job}', [AdminController::class, 'deleteJob']);
+    Route::get('/internships', [AdminController::class, 'internships']);
+    Route::delete('/internships/{internship}', [AdminController::class, 'deleteInternship']);
+    Route::get('/applications', [AdminController::class, 'applications']);
 });

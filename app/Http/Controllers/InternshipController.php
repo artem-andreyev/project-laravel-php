@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Internship;
 use App\Models\Application;
+use App\Models\Employer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,27 +30,16 @@ class InternshipController extends Controller
             $query->where('duration', $request->input('duration'));
         }
 
-        $internships = $query->simplePaginate(6);
-
-        return view('internships.index', [
-            'internships' => $internships,
-        ]);
+        return view('internships.index', ['internships' => $query->simplePaginate(6)]);
     }
 
     public function create()
     {
-        if (!Auth::check()) {
-            return redirect('/login');
-        }
         return view('internships.create');
     }
 
     public function store(Request $request)
     {
-        if (!Auth::check()) {
-            return redirect('/login');
-        }
-
         $validated = $request->validate([
             'title'        => ['required', 'min:3'],
             'duration'     => ['required'],
@@ -59,65 +49,32 @@ class InternshipController extends Controller
         ]);
 
         $user = Auth::user();
-        $employer = $user->employer ?? \App\Models\Employer::inRandomOrder()->first()
-            ?? \App\Models\Employer::factory()->create();
+        $employer = $user->employer ?? Employer::inRandomOrder()->first() ?? Employer::factory()->create();
 
-        Internship::create([
-            'title'        => $validated['title'],
-            'duration'     => $validated['duration'],
-            'description'  => $validated['description'] ?? null,
-            'location'     => $validated['location'] ?? 'Rīga',
-            'requirements' => $validated['requirements'] ?? null,
-            'employer_id'  => $employer->id,
-        ]);
+        Internship::create(array_merge($validated, ['employer_id' => $employer->id]));
 
         return redirect('/internships')->with('success', 'Internship posted successfully!');
     }
 
     public function show(Internship $internship)
     {
-        $hasApplied = false;
-        if (Auth::check()) {
-            $hasApplied = Application::where('user_id', Auth::id())
-                ->where('listing_type', 'internship')
-                ->where('listing_id', $internship->id)
-                ->exists();
-        }
+        $hasApplied = Auth::check() && Application::where('user_id', Auth::id())
+            ->where('listing_type', 'internship')
+            ->where('listing_id', $internship->id)
+            ->exists();
 
-        return view('internships.show', [
-            'internship' => $internship,
-            'hasApplied' => $hasApplied,
-        ]);
+        return view('internships.show', compact('internship', 'hasApplied'));
     }
 
     public function edit(Internship $internship)
     {
-        if (!Auth::check()) {
-            return redirect('/login');
-        }
-
-        $user = Auth::user();
-        $isOwner = $user->employer && $user->employer->id === $internship->employer_id;
-
-        if (!$user->isAdmin() && !$isOwner) {
-            abort(403, 'You do not have permission to edit this internship.');
-        }
-
-        return view('internships.edit', ['internship' => $internship]);
+        $this->authorizeOwner($internship->employer_id);
+        return view('internships.edit', compact('internship'));
     }
 
     public function update(Request $request, Internship $internship)
     {
-        if (!Auth::check()) {
-            return redirect('/login');
-        }
-
-        $user = Auth::user();
-        $isOwner = $user->employer && $user->employer->id === $internship->employer_id;
-
-        if (!$user->isAdmin() && !$isOwner) {
-            abort(403, 'You do not have permission to update this internship.');
-        }
+        $this->authorizeOwner($internship->employer_id);
 
         $validated = $request->validate([
             'title'        => ['required', 'min:3'],
@@ -129,24 +86,22 @@ class InternshipController extends Controller
 
         $internship->update($validated);
 
-        return redirect('/internships/' . $internship->id)->with('success', 'Internship updated successfully!');
+        return redirect('/internships/' . $internship->id)->with('success', 'Internship updated!');
     }
 
     public function destroy(Internship $internship)
     {
-        if (!Auth::check()) {
-            return redirect('/login');
-        }
-
-        $user = Auth::user();
-        $isOwner = $user->employer && $user->employer->id === $internship->employer_id;
-
-        if (!$user->isAdmin() && !$isOwner) {
-            abort(403, 'You do not have permission to delete this internship.');
-        }
-
+        $this->authorizeOwner($internship->employer_id);
         $internship->delete();
-
         return redirect('/internships')->with('success', 'Internship deleted.');
+    }
+
+    private function authorizeOwner(int $employerId): void
+    {
+        $user = Auth::user();
+        $isOwner = $user->employer && $user->employer->id === $employerId;
+        if (!$user->isAdmin() && !$isOwner) {
+            abort(403);
+        }
     }
 }
