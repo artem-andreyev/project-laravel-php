@@ -106,6 +106,66 @@
                     </li>
                 </ul>
             </div>
+
+            <!-- Save button -->
+            @auth
+            <form method="POST" action="/saved/toggle">
+                @csrf
+                <input type="hidden" name="listing_type" value="job">
+                <input type="hidden" name="listing_id" value="{{ $job->id }}">
+                @php $saved = auth()->user()->hasSaved('job', $job->id); @endphp
+                <button type="submit"
+                    class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border text-sm font-semibold transition
+                        {{ $saved ? 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100' : 'bg-white border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600' }}">
+                    <svg class="w-4 h-4" fill="{{ $saved ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                    </svg>
+                    {{ $saved ? 'Saved' : 'Save Job' }}
+                </button>
+            </form>
+            @endauth
+
+            <!-- Skills match -->
+            @auth
+            @if(!Auth::user()->canPostListings() && $job->requirements && Auth::user()->profile && Auth::user()->profile->skills)
+                @php
+                    $userSkills = array_map('trim', explode(',', strtolower(Auth::user()->profile->skills)));
+                    $requirements = strtolower($job->requirements . ' ' . $job->description);
+                    $matched = array_filter($userSkills, fn($s) => strlen($s) > 2 && str_contains($requirements, $s));
+                    $total = count($userSkills);
+                    $matchCount = count($matched);
+                    $pct = $total > 0 ? min(100, round($matchCount / $total * 100)) : 0;
+                    $color = $pct >= 70 ? 'emerald' : ($pct >= 40 ? 'yellow' : 'red');
+                @endphp
+                <div class="bg-white rounded-xl border border-gray-200 p-5">
+                    <h4 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                        Skills Match
+                    </h4>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-2xl font-extrabold text-{{ $color }}-600">{{ $pct }}%</span>
+                        <span class="text-xs text-gray-500">{{ $matchCount }}/{{ $total }} skills</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2 mb-3">
+                        <div class="bg-{{ $color }}-500 h-2 rounded-full transition-all" style="width: {{ $pct }}%"></div>
+                    </div>
+                    @if(count($matched) > 0)
+                        <div class="flex flex-wrap gap-1">
+                            @foreach(array_slice($matched, 0, 5) as $skill)
+                                <span class="text-xs bg-{{ $color }}-50 text-{{ $color }}-700 border border-{{ $color }}-200 px-2 py-0.5 rounded-full">{{ $skill }}</span>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-xs text-gray-400"><a href="/profile/edit" class="text-blue-600 hover:underline">Update your skills</a> to see your match score.</p>
+                    @endif
+                </div>
+            @elseif(!Auth::user()->canPostListings() && (!Auth::user()->profile || !Auth::user()->profile->skills))
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center">
+                    <p class="text-xs text-blue-700 mb-2">Add skills to your profile to see how well you match this job.</p>
+                    <a href="/profile/edit" class="text-xs font-semibold text-blue-600 hover:underline">Update Profile →</a>
+                </div>
+            @endif
+            @endauth
         </div>
     </div>
 

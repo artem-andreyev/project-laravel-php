@@ -10,7 +10,7 @@
                 </div>
                 <div>
                     <h2 class="text-lg font-bold text-gray-900">AI CV Generator</h2>
-                    <p class="text-sm text-gray-500">Powered by GPT-4o — generates a professional CV from your profile.</p>
+                    <p class="text-sm text-gray-500">Powered by Gemini 2.5 Flash-Lite — generates a professional CV from your profile.</p>
                 </div>
             </div>
 

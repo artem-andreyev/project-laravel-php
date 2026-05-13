@@ -44,26 +44,42 @@
     @else
         <div class="space-y-4">
             @foreach($internships as $internship)
-                <a href="/internships/{{ $internship->id }}" class="block bg-white rounded-xl border border-gray-200 p-5 hover:border-blue-300 hover:shadow-md transition group">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{{ $internship->employer->name }}</span>
-                            </div>
-                            <h3 class="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition">{{ $internship->title }}</h3>
-                            @if($internship->description)
-                                <p class="text-gray-600 text-sm mt-1">{{ Str::limit($internship->description, 120) }}</p>
-                            @endif
-                            <div class="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-500">
-                                @if($internship->location)
-                                    <span>{{ $internship->location }}</span>
+                <div class="relative bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition group">
+                    <a href="/internships/{{ $internship->id }}" class="block p-5">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1 pr-10">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{{ $internship->employer->name ?? 'Company' }}</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition">{{ $internship->title }}</h3>
+                                @if($internship->description)
+                                    <p class="text-gray-600 text-sm mt-1">{{ Str::limit($internship->description, 120) }}</p>
                                 @endif
-                                <span>{{ $internship->duration }} {{ $internship->duration == 1 ? 'month' : 'months' }}</span>
+                                <div class="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-500">
+                                    @if($internship->location)
+                                        <span>{{ $internship->location }}</span>
+                                    @endif
+                                    <span>{{ $internship->duration }} {{ $internship->duration == 1 ? 'month' : 'months' }}</span>
+                                </div>
                             </div>
+                            <span class="text-xs text-gray-400 whitespace-nowrap mt-10">{{ $internship->created_at->diffForHumans() }}</span>
                         </div>
-                        <span class="text-xs text-gray-400 ml-4 whitespace-nowrap">{{ $internship->created_at->diffForHumans() }}</span>
-                    </div>
-                </a>
+                    </a>
+                    @auth
+                        @php $saved = auth()->user()->hasSaved('internship', $internship->id); @endphp
+                        <form method="POST" action="/saved/toggle" class="absolute top-4 right-4">
+                            @csrf
+                            <input type="hidden" name="listing_type" value="internship">
+                            <input type="hidden" name="listing_id" value="{{ $internship->id }}">
+                            <button type="submit" title="{{ $saved ? 'Remove from saved' : 'Save internship' }}"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg transition {{ $saved ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50' }}">
+                                <svg class="w-4 h-4" fill="{{ $saved ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                                </svg>
+                            </button>
+                        </form>
+                    @endauth
+                </div>
             @endforeach
         </div>
         <div class="mt-6">{{ $internships->withQueryString()->links() }}</div>

@@ -8,6 +8,10 @@ class Profile extends Model
 {
     protected $guarded = [];
 
+    protected $casts = [
+        'cv_generated_at' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

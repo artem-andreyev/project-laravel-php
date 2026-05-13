@@ -8,6 +8,29 @@ use Illuminate\Support\Facades\Http;
 
 class CvController extends Controller
 {
+    public function saved()
+    {
+        $user    = Auth::user();
+        $profile = $user->profile;
+
+        if (!$profile?->cv_content) {
+            return redirect('/cv/generate')->with('info', 'You have no saved CV yet. Generate one first.');
+        }
+
+        $cv     = $profile->cv_content;
+        $cvHtml = \Illuminate\Support\Str::markdown($cv);
+
+        return view('cv.result', compact('cv', 'cvHtml', 'user'));
+    }
+
+    public function deleteSaved()
+    {
+        $user = Auth::user();
+        $user->profile?->update(['cv_content' => null, 'cv_generated_at' => null]);
+
+        return redirect('/profile')->with('success', 'Saved CV deleted.');
+    }
+
     public function form()
     {
         $user    = Auth::user();
@@ -30,29 +53,44 @@ class CvController extends Controller
         $bio       = $profile?->bio       ?? $request->input('bio', '');
         $location  = $profile?->location  ?? '';
 
-        $prompt = "Write a {$request->tone} CV for {$user->full_name}.
-Target job: {$request->job_title}.
-Location: {$location}.
-Summary/Bio: {$bio}.
-Skills: {$skills}.
-Education: {$education}.
+        $prompt = "Create a complete, {$request->tone} CV in markdown for {$user->full_name} applying for the role of {$request->job_title}.
 
-Format in markdown with sections: ## Summary, ## Skills, ## Education. Be concise and impactful. Only use the provided information, do not invent details.";
+Candidate info:
+- Location: {$location}
+- Bio/About: {$bio}
+- Skills: {$skills}
+- Education: {$education}
 
-        $apiKey = config('services.groq.key');
+Instructions:
+- Use the candidate's info as the foundation and expand it professionally.
+- Generate ALL of these sections (use ## for section headers):
+  ## Professional Summary
+  ## Skills
+  ## Work Experience (if no real experience, write \"Open to first opportunities\" with 2-3 relevant internship/junior-level bullet points they could pursue)
+  ## Education
+  ## Additional Information (languages, interests, soft skills — infer from context)
+- Under ## Skills, list skills as a comma-separated line, not a bullet list.
+- Make the summary 3-4 sentences: who they are, what they bring, what they're looking for.
+- Be specific, modern, and ATS-friendly. Do NOT add a name header at the top.";
+
+        $apiKey = config('services.gemini.key');
 
         if (!$apiKey) {
-            return back()->with('error', 'Groq API key not configured. Add GROQ_API_KEY to your .env file.');
+            return back()->with('error', 'Gemini API key not configured. Add GEMINI_API_KEY to your .env file.');
         }
 
-        $response = Http::withToken($apiKey)
-            ->timeout(30)
-            ->post('https://api.groq.com/openai/v1/chat/completions', [
-                'model'      => 'llama-3.1-8b-instant',
-                'max_tokens' => 1024,
-                'messages'   => [
-                    ['role' => 'system', 'content' => 'You are a professional CV writer. Write clear, modern, ATS-friendly CVs in markdown.'],
-                    ['role' => 'user',   'content' => $prompt],
+        $response = Http::timeout(30)
+            ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key={$apiKey}", [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => "You are a professional CV writer. Write clear, modern, ATS-friendly CVs in markdown.\n\n" . $prompt],
+                        ],
+                    ],
+                ],
+                'generationConfig' => [
+                    'maxOutputTokens' => 1024,
+                    'temperature'     => 0.7,
                 ],
             ]);
 
@@ -61,12 +99,21 @@ Format in markdown with sections: ## Summary, ## Skills, ## Education. Be concis
             return back()->with('error', "AI error: {$msg}");
         }
 
-        $cv = $response->json('choices.0.message.content');
+        $cv = $response->json('candidates.0.content.parts.0.text');
 
         if (!$cv) {
             return back()->with('error', 'No response from AI. Try again.');
         }
 
-        return view('cv.result', compact('cv', 'user'));
+        // Save to profile
+        $profile = $user->profile ?? \App\Models\Profile::create(['user_id' => $user->id]);
+        $profile->update([
+            'cv_content'      => $cv,
+            'cv_generated_at' => now(),
+        ]);
+
+        $cvHtml = \Illuminate\Support\Str::markdown($cv);
+
+        return view('cv.result', compact('cv', 'cvHtml', 'user'));
     }
 }

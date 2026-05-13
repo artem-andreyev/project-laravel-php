@@ -3,45 +3,111 @@
 
     <div class="max-w-3xl mx-auto space-y-4">
 
-        <div class="flex items-center justify-between">
+        <!-- Top actions -->
+        <div class="flex items-center justify-between print-hide">
             <a href="/cv/generate" class="text-sm text-gray-400 hover:text-gray-700 transition">← Generate another</a>
             <button onclick="window.print()"
                 class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                Print / Save PDF
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                Print / Save as PDF
             </button>
         </div>
 
-        <div class="bg-white rounded-2xl border border-blue-100 shadow-sm overflow-hidden">
-            <div class="px-8 py-5 border-b border-gray-100 bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center gap-4">
-                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                    <span class="text-white text-xl font-black">{{ strtoupper(substr($user->first_name,0,1)) }}{{ strtoupper(substr($user->last_name,0,1)) }}</span>
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold text-white">{{ $user->full_name }}</h2>
-                    <p class="text-blue-100 text-sm">{{ $user->email }}</p>
+        <!-- CV Card -->
+        <div id="cv-document" class="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
+
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-10 py-8 print:px-8 print:py-6">
+                <div class="flex items-center gap-5">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+                        <span class="text-white text-2xl font-black">
+                            {{ strtoupper(substr($user->first_name, 0, 1)) }}{{ strtoupper(substr($user->last_name, 0, 1)) }}
+                        </span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-extrabold text-white tracking-tight">{{ $user->full_name }}</h1>
+                        <div class="flex flex-wrap items-center gap-3 mt-1.5 text-blue-100 text-sm">
+                            <span class="flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                {{ $user->email }}
+                            </span>
+                            @if($user->profile?->location)
+                                <span class="flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                                    {{ $user->profile->location }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="px-8 py-6 prose prose-sm max-w-none
-                prose-headings:font-bold prose-headings:text-gray-900 prose-headings:text-base
-                prose-p:text-gray-700 prose-p:leading-relaxed
-                prose-ul:text-gray-700 prose-li:text-gray-700
-                prose-strong:text-gray-900">
-                {!! Str::markdown($cv) !!}
+            <!-- CV Body -->
+            <div class="px-10 py-8 print:px-8 print:py-6 space-y-7 cv-body">
+                {!! $cvHtml !!}
             </div>
         </div>
 
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+        <!-- Note -->
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 print-hide">
             <strong>Note:</strong> This CV was generated by AI. Review and edit it before sending to employers.
             <a href="/profile/edit" class="underline font-semibold ml-1">Update your profile</a> for better results next time.
         </div>
     </div>
 
     <style>
+    /* CV section styling */
+    .cv-body h2 {
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #6366f1;
+        border-bottom: 2px solid #e0e7ff;
+        padding-bottom: 0.4rem;
+        margin-bottom: 0.75rem;
+        margin-top: 0;
+    }
+    .cv-body p {
+        color: #374151;
+        line-height: 1.7;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    .cv-body ul {
+        padding-left: 0;
+        list-style: none;
+        margin-bottom: 0.5rem;
+    }
+    .cv-body ul li {
+        color: #374151;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        padding-left: 1.1rem;
+        position: relative;
+        margin-bottom: 0.3rem;
+    }
+    .cv-body ul li::before {
+        content: "▸";
+        position: absolute;
+        left: 0;
+        color: #6366f1;
+        font-size: 0.75rem;
+        top: 0.15rem;
+    }
+    .cv-body strong {
+        color: #111827;
+        font-weight: 700;
+    }
+
     @media print {
-        nav, header, footer, .print-hide { display: none !important; }
-        body { background: white; }
+        .print-hide { display: none !important; }
+        nav, header, footer, x-layout > *:not(#cv-document) { display: none !important; }
+        body { background: white !important; }
+        #cv-document { box-shadow: none !important; border: none !important; border-radius: 0 !important; }
+        .cv-body h2 { color: #4f46e5 !important; }
     }
     </style>
 </x-layout>

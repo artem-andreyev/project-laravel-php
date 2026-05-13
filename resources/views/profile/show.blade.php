@@ -62,11 +62,13 @@
                     </div>
 
                     <div class="self-start sm:self-auto flex items-center gap-2 flex-wrap">
+                        @if(!$profile->cv_content)
                         <a href="/cv/generate"
                            class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition shadow-sm hover:shadow-md">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
                             AI CV
                         </a>
+                        @endif
                         <a href="/profile/edit"
                            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition shadow-sm hover:shadow-md">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -122,6 +124,56 @@
             <a href="/profile/edit"
                class="flex-shrink-0 text-sm font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl transition">
                 Complete profile →
+            </a>
+        </div>
+        @endif
+
+        {{-- ── AI CV ── --}}
+        @if($profile->cv_content)
+        <div class="bg-white rounded-2xl border border-indigo-100 shadow-sm overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-blue-50">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-900">AI-Generated CV</h3>
+                        <p class="text-xs text-gray-400">Generated {{ $profile->cv_generated_at?->diffForHumans() }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="/cv/saved" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition">
+                        View CV →
+                    </a>
+                    <a href="/cv/generate" class="text-xs font-semibold text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition">
+                        Regenerate
+                    </a>
+                    <form method="POST" action="/cv/saved" onsubmit="return confirm('Delete your saved CV?')">
+                        @csrf @method('DELETE')
+                        <button class="text-xs font-semibold text-red-400 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg transition">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="px-6 py-4 text-sm text-gray-600 leading-relaxed">
+                {!! Str::limit(strip_tags(\Illuminate\Support\Str::markdown($profile->cv_content)), 300) !!}…
+                <a href="/cv/saved" class="text-xs text-indigo-600 hover:underline font-semibold ml-1">Read full CV</a>
+            </div>
+        </div>
+        @else
+        <div class="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-2xl border border-indigo-100 shadow-sm p-6 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-11 h-11 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-gray-900">No AI CV saved yet</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Generate a professional CV in seconds with AI</p>
+                </div>
+            </div>
+            <a href="/cv/generate" class="flex-shrink-0 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition shadow-sm whitespace-nowrap">
+                Generate CV
             </a>
         </div>
         @endif

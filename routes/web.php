@@ -13,7 +13,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CvController;
 use App\Http\Controllers\SavedListingController;
 
-Route::view('/', 'home');
+Route::get('/', [\App\Http\Controllers\HomeController::class, 'index']);
 Route::view('/contact', 'contact');
 
 // Jobs — public
@@ -59,6 +59,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile', [ProfileController::class, 'update']);
     Route::get('/cv/generate', [CvController::class, 'form']);
     Route::post('/cv/generate', [CvController::class, 'generate']);
+    Route::get('/cv/saved', [CvController::class, 'saved']);
+    Route::delete('/cv/saved', [CvController::class, 'deleteSaved']);
 
     // Applications (job seekers)
     Route::get('/applications', [ApplicationController::class, 'index']);

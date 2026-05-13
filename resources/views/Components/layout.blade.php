@@ -36,12 +36,33 @@
                     <a href="/register" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition shadow-sm">Register</a>
                 @endguest
                 @auth
+                    @php
+                        $pendingBadge = 0;
+                        if (Auth::user()->canPostListings() && Auth::user()->employer) {
+                            $empId = Auth::user()->employer->id;
+                            $jobIds = \App\Models\Job::where('employer_id', $empId)->pluck('id');
+                            $internshipIds = \App\Models\Internship::where('employer_id', $empId)->pluck('id');
+                            $pendingBadge = \App\Models\Application::where('status', 'pending')
+                                ->where(function($q) use ($jobIds, $internshipIds) {
+                                    $q->where(function($q2) use ($jobIds) {
+                                        $q2->where('listing_type', 'job')->whereIn('listing_id', $jobIds);
+                                    })->orWhere(function($q2) use ($internshipIds) {
+                                        $q2->where('listing_type', 'internship')->whereIn('listing_id', $internshipIds);
+                                    });
+                                })->count();
+                        }
+                    @endphp
                     <div class="flex items-center gap-1">
                         @if(Auth::user()->isAdmin())
                             <a href="/admin" class="text-amber-600 hover:text-amber-700 text-sm font-semibold px-3 py-2 rounded-lg hover:bg-amber-50 transition">Admin</a>
                         @endif
                         @if(Auth::user()->canPostListings())
-                            <a href="/employer/dashboard" class="text-gray-600 hover:text-gray-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition">Dashboard</a>
+                            <a href="/employer/dashboard" class="relative text-gray-600 hover:text-gray-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition">
+                                Dashboard
+                                @if($pendingBadge > 0)
+                                    <span class="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">{{ $pendingBadge > 9 ? '9+' : $pendingBadge }}</span>
+                                @endif
+                            </a>
                         @else
                             <a href="/saved" class="text-gray-600 hover:text-gray-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition">Saved</a>
                             <a href="/applications" class="text-gray-600 hover:text-gray-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition">Applications</a>
