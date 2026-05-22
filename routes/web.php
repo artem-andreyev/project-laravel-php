@@ -18,11 +18,13 @@ Route::view('/contact', 'contact');
 
 // Jobs — public
 Route::get('/jobs', [JobController::class, 'index']);
+
+Route::get('/jobs/create', [JobController::class, 'create']);
+
 Route::get('/jobs/{job}', [JobController::class, 'show']);
 
 // Jobs — employer only
 Route::middleware(['auth', 'employer'])->group(function () {
-    Route::get('/jobs/create', [JobController::class, 'create']);
     Route::post('/jobs', [JobController::class, 'store']);
     Route::get('/jobs/{job}/edit', [JobController::class, 'edit']);
     Route::put('/jobs/{job}', [JobController::class, 'update']);
