@@ -34,6 +34,9 @@ Route::middleware(['auth', 'employer'])->group(function () {
 
 // Internships — public
 Route::get('/internships', [InternshipController::class, 'index']);
+
+Route::get('/internships/create', [InternshipController::class, 'create']);
+
 Route::get('/internships/{internship}', [InternshipController::class, 'show']);
 
 // Internships — employer only
