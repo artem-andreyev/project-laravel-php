@@ -13,6 +13,17 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CvController;
 use App\Http\Controllers\SavedListingController;
 
+// Language switcher
+Route::get('/language/{lang}', function ($lang) {
+    $supported = ['en', 'lv'];
+    if (in_array($lang, $supported)) {
+        session()->put('locale', $lang);
+        // Force set app locale for current request
+        app()->setLocale($lang);
+    }
+    return redirect()->back()->with('message', 'Language changed successfully');
+})->name('language.switch');
+
 Route::get('/', [\App\Http\Controllers\HomeController::class, 'index']);
 Route::view('/contact', 'contact');
 

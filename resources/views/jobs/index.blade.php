@@ -1,5 +1,5 @@
 <x-layout>
-    <x-slot:heading>Job Listings</x-slot:heading>
+    <x-slot:heading>{{ __('jobs.heading') }}</x-slot:heading>
 
     <!-- Filter Bar -->
     <form method="GET" action="/jobs" class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
@@ -8,26 +8,26 @@
                 type="text"
                 name="search"
                 value="{{ request('search') }}"
-                placeholder="Search by title or salary..."
+                placeholder="{{ __('jobs.search') }}..."
                 class="border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             >
             <select name="job_type" class="border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                <option value="">All Types</option>
-                <option value="full-time" {{ request('job_type') == 'full-time' ? 'selected' : '' }}>Full-time</option>
-                <option value="part-time" {{ request('job_type') == 'part-time' ? 'selected' : '' }}>Part-time</option>
-                <option value="remote" {{ request('job_type') == 'remote' ? 'selected' : '' }}>Remote</option>
-                <option value="internship" {{ request('job_type') == 'internship' ? 'selected' : '' }}>Internship</option>
+                <option value="">{{ __('jobs.type') }}</option>
+                <option value="full-time" {{ request('job_type') == 'full-time' ? 'selected' : '' }}>{{ __('jobs.type.fullTime') }}</option>
+                <option value="part-time" {{ request('job_type') == 'part-time' ? 'selected' : '' }}>{{ __('jobs.type.partTime') }}</option>
+                <option value="remote" {{ request('job_type') == 'remote' ? 'selected' : '' }}>{{ __('jobs.type.remote') }}</option>
+                <option value="internship" {{ request('job_type') == 'internship' ? 'selected' : '' }}>{{ __('jobs.type.internship') }}</option>
             </select>
             <input
                 type="text"
                 name="location"
                 value="{{ request('location') }}"
-                placeholder="Location (e.g. Riga)..."
+                placeholder="{{ __('jobs.location') }}..."
                 class="border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
             >
             <div class="flex gap-2">
-                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg text-sm transition">Search</button>
-                <a href="/jobs" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-lg text-sm transition text-center">Reset</a>
+                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg text-sm transition">{{ __('home.search.button') }}</button>
+                <a href="/jobs" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-lg text-sm transition text-center">{{ __('buttons.reset') }}</a>
             </div>
         </div>
     </form>
@@ -37,8 +37,8 @@
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <p class="mt-4 text-gray-500 text-lg">No jobs found matching your criteria.</p>
-            <a href="/jobs" class="mt-4 inline-block text-blue-600 hover:underline">Clear filters</a>
+            <p class="mt-4 text-gray-500 text-lg">{{ __('jobs.noJobs') }}</p>
+            <a href="/jobs" class="mt-4 inline-block text-blue-600 hover:underline">{{ __('buttons.reset') }}</a>
         </div>
     @else
         <div class="space-y-4">
@@ -48,7 +48,7 @@
                         <div class="flex items-start justify-between">
                             <div class="flex-1 pr-10">
                                 <div class="flex items-center gap-2 mb-1">
-                                    <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{{ $job->employer->name ?? 'Company' }}</span>
+                                    <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{{ $job->employer->name ?? __('companies.generic') }}</span>
                                     @if($job->industry)
                                         <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{{ $job->industry }}</span>
                                     @endif
@@ -57,11 +57,21 @@
                                 @if($job->description)
                                     <p class="text-gray-600 text-sm mt-1">{{ Str::limit($job->description, 120) }}</p>
                                 @endif
+                                @php
+                                    $jobType = $job->job_type ?? 'full-time';
+                                    $jobTypeLabels = [
+                                        'full-time' => __('jobs.type.fullTime'),
+                                        'part-time' => __('jobs.type.partTime'),
+                                        'remote' => __('jobs.type.remote'),
+                                        'internship' => __('jobs.type.internship'),
+                                    ];
+                                    $jobTypeLabel = $jobTypeLabels[$jobType] ?? Str::headline($jobType);
+                                @endphp
                                 <div class="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-500">
                                     @if($job->location)
                                         <span>{{ $job->location }}</span>
                                     @endif
-                                    <span class="capitalize">{{ str_replace('-', ' ', $job->job_type ?? 'full-time') }}</span>
+                                    <span>{{ $jobTypeLabel }}</span>
                                     <span>{{ $job->salary }}</span>
                                 </div>
                             </div>
@@ -74,7 +84,7 @@
                             @csrf
                             <input type="hidden" name="listing_type" value="job">
                             <input type="hidden" name="listing_id" value="{{ $job->id }}">
-                            <button type="submit" title="{{ $saved ? 'Remove from saved' : 'Save job' }}"
+                            <button type="submit" title="{{ $saved ? __('saved.remove') : __('saved.saveJob') }}"
                                 class="w-8 h-8 flex items-center justify-center rounded-lg transition {{ $saved ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50' }}">
                                 <svg class="w-4 h-4" fill="{{ $saved ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>

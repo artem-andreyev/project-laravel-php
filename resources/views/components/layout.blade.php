@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="{{ app()->getLocale() }}" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LVCareer - Find Your Dream Job</title>
+    <title>{{ __('app.name') }} - {{ __('app.tagline') }}</title>
     @vite(['resources/js/app.js'])
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50">
@@ -22,18 +22,19 @@
                     <span class="font-extrabold text-xl tracking-tight text-gray-900">LV<span class="text-blue-600">Career</span></span>
                 </a>
                 <div class="hidden md:flex items-center gap-1">
-                    <x-nav-link href="/" :active="request()->is('/')">Home</x-nav-link>
-                    <x-nav-link href="/jobs" :active="request()->is('jobs') || request()->is('jobs/*')">Jobs</x-nav-link>
-                    <x-nav-link href="/internships" :active="request()->is('internships') || request()->is('internships/*')">Internships</x-nav-link>
-                    <x-nav-link href="/contact" :active="request()->is('contact')">Contact</x-nav-link>
+                    <x-nav-link href="/" :active="request()->is('/')">{{ __('nav.home') }}</x-nav-link>
+                    <x-nav-link href="/jobs" :active="request()->is('jobs') || request()->is('jobs/*')">{{ __('nav.jobs') }}</x-nav-link>
+                    <x-nav-link href="/internships" :active="request()->is('internships') || request()->is('internships/*')">{{ __('nav.internships') }}</x-nav-link>
+                    <x-nav-link href="/contact" :active="request()->is('contact')">{{ __('nav.contact') }}</x-nav-link>
                 </div>
             </div>
 
             <!-- Right side -->
             <div class="hidden md:flex items-center gap-2">
+                <x-language-switcher-final />
                 @guest
-                    <a href="/login" class="text-gray-600 hover:text-gray-900 text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-100 transition">Log In</a>
-                    <a href="/register" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition shadow-sm">Register</a>
+                    <a href="/login" class="text-gray-600 hover:text-gray-900 text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-100 transition">{{ __('nav.login') }}</a>
+                    <a href="/register" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition shadow-sm">{{ __('nav.register') }}</a>
                 @endguest
                 @auth
                     @php
@@ -54,18 +55,18 @@
                     @endphp
                     <div class="flex items-center gap-1">
                         @if(Auth::user()->isAdmin())
-                            <a href="/admin" class="text-amber-600 hover:text-amber-700 text-sm font-semibold px-3 py-2 rounded-lg hover:bg-amber-50 transition">Admin</a>
+                            <a href="/admin" class="text-amber-600 hover:text-amber-700 text-sm font-semibold px-3 py-2 rounded-lg hover:bg-amber-50 transition">{{ __('nav.admin') }}</a>
                         @endif
                         @if(Auth::user()->canPostListings())
                             <a href="/employer/dashboard" class="relative text-gray-600 hover:text-gray-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition">
-                                Dashboard
+                                {{ __('nav.dashboard') }}
                                 @if($pendingBadge > 0)
                                     <span class="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">{{ $pendingBadge > 9 ? '9+' : $pendingBadge }}</span>
                                 @endif
                             </a>
                         @else
-                            <a href="/saved" class="text-gray-600 hover:text-gray-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition">Saved</a>
-                            <a href="/applications" class="text-gray-600 hover:text-gray-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition">Applications</a>
+                            <a href="/saved" class="text-gray-600 hover:text-gray-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition">{{ __('nav.saved') }}</a>
+                            <a href="/applications" class="text-gray-600 hover:text-gray-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition">{{ __('nav.applications') }}</a>
                         @endif
                         <a href="/profile" class="flex items-center gap-2 ml-1 px-3 py-2 rounded-lg hover:bg-blue-50 transition group">
                             <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
@@ -75,7 +76,7 @@
                         </a>
                         <form method="POST" action="/logout" class="ml-1">
                             @csrf
-                            <button type="submit" class="text-gray-500 hover:text-red-600 text-sm font-medium px-3 py-2 rounded-lg hover:bg-red-50 transition">Log Out</button>
+                            <button type="submit" class="text-gray-500 hover:text-red-600 text-sm font-medium px-3 py-2 rounded-lg hover:bg-red-50 transition">{{ __('nav.logout') }}</button>
                         </form>
                     </div>
                 @endauth
@@ -95,26 +96,31 @@
     <!-- Mobile menu -->
     <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 bg-white">
         <div class="px-4 py-3 space-y-1">
-            <a href="/" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">Home</a>
-            <a href="/jobs" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">Jobs</a>
-            <a href="/internships" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">Internships</a>
-            <a href="/contact" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">Contact</a>
+            <a href="/" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.home') }}</a>
+            <a href="/jobs" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.jobs') }}</a>
+            <a href="/internships" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.internships') }}</a>
+            <a href="/contact" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.contact') }}</a>
             <div class="border-t border-gray-100 my-2"></div>
             @guest
-                <a href="/login" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">Log In</a>
-                <a href="/register" class="block text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-semibold transition">Register</a>
+                <a href="/login" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.login') }}</a>
+                <a href="/register" class="block text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-semibold transition">{{ __('nav.register') }}</a>
             @endguest
             @auth
-                <a href="/profile" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">My Profile</a>
-                <a href="/applications" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">My Applications</a>
+                <a href="/profile" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.profile') }}</a>
+                <a href="/applications" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.applications') }}</a>
                 @if(Auth::user()->isAdmin())
-                    <a href="/admin" class="block text-amber-600 hover:bg-amber-50 px-3 py-2 rounded-lg text-sm font-semibold transition">Admin Panel</a>
+                    <a href="/admin" class="block text-amber-600 hover:bg-amber-50 px-3 py-2 rounded-lg text-sm font-semibold transition">{{ __('nav.adminPanel') }}</a>
                 @endif
                 <form method="POST" action="/logout">
                     @csrf
-                    <button type="submit" class="block w-full text-left text-red-500 hover:bg-red-50 px-3 py-2 rounded-lg text-sm font-medium transition">Log Out</button>
+                    <button type="submit" class="block w-full text-left text-red-500 hover:bg-red-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.logout') }}</button>
                 </form>
             @endauth
+            <div class="border-t border-gray-100 my-2"></div>
+            <div class="px-3 py-2 flex gap-2">
+                <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" class="flex-1 text-center px-2 py-1 rounded text-xs font-medium {{ app()->getLocale() === 'en' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100' }}">EN</a>
+                <a href="{{ request()->fullUrlWithQuery(['lang' => 'lv']) }}" class="flex-1 text-center px-2 py-1 rounded text-xs font-medium {{ app()->getLocale() === 'lv' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100' }}">LV</a>
+            </div>
         </div>
     </div>
 </nav>
@@ -183,44 +189,44 @@
                     </div>
                     <span class="font-extrabold text-lg text-gray-900">LV<span class="text-blue-600">Career</span></span>
                 </div>
-                <p class="text-sm text-gray-500 leading-relaxed max-w-xs">Latvia's platform for jobs, internships and professional opportunities. Connect with top employers.</p>
+                <p class="text-sm text-gray-500 leading-relaxed max-w-xs">{{ __('footer.description') }}</p>
             </div>
 
             <!-- Quick Links -->
             <div>
-                <h4 class="text-sm font-semibold text-gray-900 mb-3">Quick Links</h4>
+                <h4 class="text-sm font-semibold text-gray-900 mb-3">{{ __('footer.quickLinks') }}</h4>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="/jobs" class="text-gray-500 hover:text-blue-600 transition">Browse Jobs</a></li>
-                    <li><a href="/internships" class="text-gray-500 hover:text-blue-600 transition">Internships</a></li>
-                    <li><a href="/contact" class="text-gray-500 hover:text-blue-600 transition">Contact</a></li>
+                    <li><a href="/jobs" class="text-gray-500 hover:text-blue-600 transition">{{ __('footer.browseJobs') }}</a></li>
+                    <li><a href="/internships" class="text-gray-500 hover:text-blue-600 transition">{{ __('footer.internships') }}</a></li>
+                    <li><a href="/contact" class="text-gray-500 hover:text-blue-600 transition">{{ __('footer.contact') }}</a></li>
                 </ul>
             </div>
 
             <!-- Contact -->
             <div>
-                <h4 class="text-sm font-semibold text-gray-900 mb-3">Contact</h4>
+                <h4 class="text-sm font-semibold text-gray-900 mb-3">{{ __('footer.contactTitle') }}</h4>
                 <ul class="space-y-2 text-sm text-gray-500">
                     <li class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                        support@lvcareer.lv
+                        {{ __('contact.support') }}
                     </li>
                     <li class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                        +371 20 000 000
+                        {{ __('contact.tel') }}
                     </li>
                     <li class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
-                        Riga, Latvia
+                        {{ __('contact.location') }}
                     </li>
                 </ul>
             </div>
         </div>
 
         <div class="border-t border-gray-100 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p class="text-sm text-gray-400">&copy; {{ date('Y') }} LVCareer. All rights reserved.</p>
+            <p class="text-sm text-gray-400">&copy; {{ date('Y') }} LVCareer. {{ __('footer.copyright') }}</p>
             <div class="flex items-center gap-1">
                 <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-                <span class="text-xs text-gray-400">All systems operational</span>
+                <span class="text-xs text-gray-400">{{ __('footer.status') }}</span>
             </div>
         </div>
     </div>
