@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use League\CommonMark\CommonMarkConverter;
 
 class CvController extends Controller
 {
@@ -18,7 +19,8 @@ class CvController extends Controller
         }
 
         $cv     = $profile->cv_content;
-        $cvHtml = \Illuminate\Support\Str::markdown($cv);
+        $converter = new CommonMarkConverter();
+        $cvHtml = $converter->convert($cv)->getContent();
 
         return view('cv.result', compact('cv', 'cvHtml', 'user'));
     }
@@ -112,7 +114,8 @@ Instructions:
             'cv_generated_at' => now(),
         ]);
 
-        $cvHtml = \Illuminate\Support\Str::markdown($cv);
+        $converter = new CommonMarkConverter();
+        $cvHtml = $converter->convert($cv)->getContent();
 
         return view('cv.result', compact('cv', 'cvHtml', 'user'));
     }
