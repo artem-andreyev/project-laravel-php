@@ -18,7 +18,11 @@ class CvController extends Controller
             return redirect('/cv/generate')->with('info', 'You have no saved CV yet. Generate one first.');
         }
 
-        $cv     = $profile->cv_content;
+        $cv = $profile->cv_content;
+        $cv = preg_replace('/^```(?:markdown)?\s*/i', '', trim($cv));
+        $cv = preg_replace('/\s*```$/', '', $cv);
+        $cv = trim($cv);
+
         $converter = new CommonMarkConverter();
         $cvHtml = $converter->convert($cv)->getContent();
 
@@ -107,7 +111,10 @@ Instructions:
             return back()->with('error', 'No response from AI. Try again.');
         }
 
-        // Save to profile
+        $cv = preg_replace('/^```(?:markdown)?\s*/i', '', trim($cv));
+        $cv = preg_replace('/\s*```$/', '', $cv);
+        $cv = trim($cv);
+
         $profile = $user->profile ?? \App\Models\Profile::create(['user_id' => $user->id]);
         $profile->update([
             'cv_content'      => $cv,
