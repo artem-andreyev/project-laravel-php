@@ -54,7 +54,8 @@ class ProfileController extends Controller
         ];
 
         if ($request->hasFile('cv')) {
-            $path = $request->file('cv')->store('cvs', 'public');
+            $filename = $request->file('cv')->getClientOriginalName();
+            $path = $request->file('cv')->storeAs('cvs', $filename, 'public');
             $profileData['cv_path'] = $path;
         }
 
