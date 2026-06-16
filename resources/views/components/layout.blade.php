@@ -65,6 +65,7 @@
                                     <span class="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">{{ $pendingBadge > 9 ? '9+' : $pendingBadge }}</span>
                                 @endif
                             </a>
+                            <a href="/saved" class="text-gray-600 hover:text-gray-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition">{{ __('nav.saved') }}</a>
                         @else
                             <a href="/saved" class="text-gray-600 hover:text-gray-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition">{{ __('nav.saved') }}</a>
                             <a href="/applications" class="text-gray-600 hover:text-gray-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition">{{ __('nav.applications') }}</a>
@@ -110,6 +111,7 @@
             @auth
                 <a href="/profile" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.profile') }}</a>
                 <a href="/applications" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.applications') }}</a>
+                <a href="/saved" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.saved') }}</a>
                 @if(Auth::user()->isAdmin())
                     <a href="/admin" class="block text-amber-600 hover:bg-amber-50 px-3 py-2 rounded-lg text-sm font-semibold transition">{{ __('nav.adminPanel') }}</a>
                 @endif
