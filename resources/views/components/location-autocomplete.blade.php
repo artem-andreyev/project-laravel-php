@@ -97,7 +97,6 @@
         setTimeout(hideSuggestions, 150);
     });
 
-    // If coords already set (edit form), show confirmation
     if (latInput.value && lngInput.value) {
         showStatus('✓ Location saved', 'text-green-600');
     }

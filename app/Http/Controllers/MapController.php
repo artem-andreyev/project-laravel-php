@@ -82,7 +82,6 @@ class MapController extends Controller
             ->map(function ($job) {
                 $location = $job->location ?? 'Rīga';
 
-                // Use stored coordinates if available
                 if ($job->latitude && $job->longitude) {
                     $coords = ['lat' => (float) $job->latitude, 'lng' => (float) $job->longitude];
                 } else {
@@ -146,12 +145,6 @@ class MapController extends Controller
             return $coords;
         }
 
-        // Fallback: try city name only
-        $cityName = strpos($location, ',') !== false
-            ? trim(explode(',', $location)[count(explode(',', $location)) - 1])
-            : $location;
-
-        // Also try the first part (street city format: "Iela 5, Rīga" → try "Rīga")
         $parts = array_map('trim', explode(',', $location));
         foreach (array_reverse($parts) as $part) {
             foreach (self::LATVIA_LOCATIONS as $city => $fallbackCoords) {
@@ -162,7 +155,6 @@ class MapController extends Controller
             }
         }
 
-        // Mark as unresolvable for 1 day to avoid hammering Nominatim
         Cache::put($cacheKey, false, now()->addDay());
         return null;
     }
@@ -202,7 +194,6 @@ class MapController extends Controller
                 ];
             }
         } catch (\Exception $e) {
-            // silent fail
         }
 
         return null;
