@@ -65,11 +65,67 @@
             </div>
         @endif
 
-        @if(!$profile->bio && !$profile->skills && !$profile->education)
+        @if($cvHtml)
+            <div class="bg-white rounded-2xl shadow-sm border border-blue-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-4">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-widest">AI-Generated CV</h3>
+                </div>
+                <div class="px-8 py-6 space-y-5 cv-body">
+                    {!! $cvHtml !!}
+                </div>
+            </div>
+        @endif
+
+        @if(!$profile->bio && !$profile->skills && !$profile->education && !$cvHtml)
             <div class="bg-white rounded-2xl border border-gray-100 p-10 text-center">
                 <p class="text-gray-400 text-sm">This user hasn't filled in their profile yet.</p>
             </div>
         @endif
+
+        <style>
+        .cv-body h2 {
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #6366f1;
+            border-bottom: 2px solid #e0e7ff;
+            padding-bottom: 0.4rem;
+            margin-bottom: 0.75rem;
+            margin-top: 0;
+        }
+        .cv-body p {
+            color: #374151;
+            line-height: 1.7;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .cv-body ul {
+            padding-left: 0;
+            list-style: none;
+            margin-bottom: 0.5rem;
+        }
+        .cv-body ul li {
+            color: #374151;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            padding-left: 1.1rem;
+            position: relative;
+            margin-bottom: 0.3rem;
+        }
+        .cv-body ul li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #6366f1;
+            font-size: 0.75rem;
+            top: 0.15rem;
+        }
+        .cv-body strong {
+            color: #111827;
+            font-weight: 700;
+        }
+        </style>
 
         <div class="text-center">
             <a href="{{ url()->previous() }}" class="text-sm text-gray-400 hover:text-gray-700 transition">← Back</a>

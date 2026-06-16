@@ -68,7 +68,16 @@ class ProfileController extends Controller
     public function showPublic(User $user)
     {
         $profile = $user->profile ?? new Profile();
-        return view('profile.public', compact('user', 'profile'));
+
+        $cvHtml = null;
+        if ($profile->cv_content) {
+            $cv = preg_replace('/^```(?:markdown)?\s*/i', '', trim($profile->cv_content));
+            $cv = preg_replace('/\s*```$/', '', $cv);
+            $converter = new \League\CommonMark\CommonMarkConverter();
+            $cvHtml = $converter->convert(trim($cv))->getContent();
+        }
+
+        return view('profile.public', compact('user', 'profile', 'cvHtml'));
     }
 
     public function downloadUserCv(User $user)
