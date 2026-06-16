@@ -12,6 +12,7 @@ use App\Http\Controllers\EmployerDashboardController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CvController;
 use App\Http\Controllers\SavedListingController;
+use App\Http\Controllers\MapController;
 
 // Language switcher
 Route::get('/language/{lang}', function ($lang) {
@@ -59,6 +60,11 @@ Route::middleware(['auth', 'employer'])->group(function () {
     Route::patch('/internships/{internship}', [InternshipController::class, 'update']);
     Route::delete('/internships/{internship}', [InternshipController::class, 'destroy']);
 });
+
+// Map — public
+Route::get('/map', [MapController::class, 'index'])->name('map.index');
+Route::get('/api/map/listings', [MapController::class, 'data'])->name('map.data');
+Route::get('/api/geocode', [MapController::class, 'geocode'])->name('map.geocode');
 
 // Auth
 Route::get('/register', [RegisteredUserController::class, 'create']);

@@ -45,16 +45,21 @@
                             @enderror
                         </div>
 
-                        <div>
-                            <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                        <div class="relative">
+                            <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location / Address</label>
                             <input
                                 type="text"
                                 name="location"
                                 id="location"
-                                value="{{ old('location', 'Riga') }}"
-                                placeholder="e.g. Riga"
+                                value="{{ old('location', 'Rīga') }}"
+                                placeholder="e.g. Brīvības iela 40, Rīga"
+                                autocomplete="off"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                             >
+                            <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude') }}">
+                            <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude') }}">
+                            <div id="location-suggestions" class="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 hidden"></div>
+                            <p id="location-status" class="text-xs mt-1 text-gray-400"></p>
                         </div>
                     </div>
 
@@ -91,4 +96,6 @@
             </form>
         </div>
     </div>
+
+    @include('components.location-autocomplete')
 </x-layout>

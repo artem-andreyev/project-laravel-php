@@ -44,7 +44,9 @@ class InternshipController extends Controller
             'title'        => ['required', 'min:3'],
             'duration'     => ['required'],
             'description'  => ['nullable', 'max:5000'],
-            'location'     => ['nullable', 'max:100'],
+            'location'     => ['nullable', 'max:255'],
+            'latitude'     => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude'    => ['nullable', 'numeric', 'between:-180,180'],
             'requirements' => ['nullable', 'max:5000'],
         ]);
 
@@ -80,7 +82,9 @@ class InternshipController extends Controller
             'title'        => ['required', 'min:3'],
             'duration'     => ['required'],
             'description'  => ['nullable', 'max:5000'],
-            'location'     => ['nullable', 'max:100'],
+            'location'     => ['nullable', 'max:255'],
+            'latitude'     => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude'    => ['nullable', 'numeric', 'between:-180,180'],
             'requirements' => ['nullable', 'max:5000'],
         ]);
 

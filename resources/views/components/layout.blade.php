@@ -25,6 +25,7 @@
                     <x-nav-link href="/" :active="request()->is('/')">{{ __('nav.home') }}</x-nav-link>
                     <x-nav-link href="/jobs" :active="request()->is('jobs') || request()->is('jobs/*')">{{ __('nav.jobs') }}</x-nav-link>
                     <x-nav-link href="/internships" :active="request()->is('internships') || request()->is('internships/*')">{{ __('nav.internships') }}</x-nav-link>
+                    <x-nav-link href="/map" :active="request()->is('map')">{{ __('nav.map') }}</x-nav-link>
                     <x-nav-link href="/contact" :active="request()->is('contact')">{{ __('nav.contact') }}</x-nav-link>
                 </div>
             </div>
@@ -99,6 +100,7 @@
             <a href="/" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.home') }}</a>
             <a href="/jobs" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.jobs') }}</a>
             <a href="/internships" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.internships') }}</a>
+            <a href="/map" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.map') }}</a>
             <a href="/contact" class="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium transition">{{ __('nav.contact') }}</a>
             <div class="border-t border-gray-100 my-2"></div>
             @guest
