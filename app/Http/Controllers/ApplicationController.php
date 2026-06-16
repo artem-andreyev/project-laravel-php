@@ -24,6 +24,18 @@ class ApplicationController extends Controller
             'cover_letter' => ['nullable', 'max:2000'],
         ]);
 
+        $listing = $request->listing_type === 'job'
+            ? Job::find($request->listing_id)
+            : Internship::find($request->listing_id);
+
+        if (!$listing) {
+            return back()->with('error', 'Position not found.');
+        }
+
+        if ($listing->is_closed) {
+            return back()->with('error', 'This position has already been filled.');
+        }
+
         $exists = Application::where('user_id', Auth::id())
             ->where('listing_type', $request->listing_type)
             ->where('listing_id', $request->listing_id)

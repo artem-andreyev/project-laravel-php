@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Application;
+use App\Models\Job;
+use App\Models\Internship;
+use App\Mail\ApplicationStatusChanged;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class EmployerDashboardController extends Controller
 {
@@ -87,7 +91,31 @@ class EmployerDashboardController extends Controller
             abort(403);
         }
 
-        $application->update(['status' => $request->status]);
+        $oldStatus = $application->status;
+        $newStatus = $request->status;
+
+        $application->update(['status' => $newStatus]);
+
+        $listing = $application->getListing();
+        $listingTitle = $listing?->title ?? 'Unknown position';
+
+        if (in_array($newStatus, ['accepted', 'rejected']) && $oldStatus !== $newStatus) {
+            try {
+                Mail::to($application->user->email)
+                    ->send(new ApplicationStatusChanged($application, $listingTitle));
+            } catch (\Exception $e) {
+            }
+        }
+
+        if ($newStatus === 'accepted' && $listing) {
+            $listing->update(['is_closed' => true]);
+
+            Application::where('listing_type', $application->listing_type)
+                ->where('listing_id', $application->listing_id)
+                ->where('id', '!=', $application->id)
+                ->where('status', 'pending')
+                ->update(['status' => 'rejected']);
+        }
 
         return back()->with('success', 'Status updated.');
     }

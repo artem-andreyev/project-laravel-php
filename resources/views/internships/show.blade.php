@@ -42,7 +42,12 @@
                     <a href="/login" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">{{ __('internships.show.loginToApply') }}</a>
                 @endguest
                 @auth
-                    @if($hasApplied)
+                    @if($internship->is_closed)
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+                            <p class="text-red-700 font-semibold text-sm">🔒 This position has been filled</p>
+                            <p class="text-red-500 text-xs mt-1">No longer accepting applications</p>
+                        </div>
+                    @elseif($hasApplied)
                         <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
                             <p class="text-green-700 font-semibold text-sm">{{ __('applications.alreadyApplied') }}</p>
                             <a href="/applications" class="text-green-600 hover:underline text-xs mt-1 block">{{ __('applications.viewYourApplications') }}</a>
