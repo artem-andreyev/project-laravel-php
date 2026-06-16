@@ -118,7 +118,7 @@
                                 <span class="text-white text-xs font-bold">{{ strtoupper(substr($app->user->first_name??'?',0,1)) }}</span>
                             </div>
                             <div class="min-w-0">
-                                <p class="text-sm font-semibold text-gray-900 truncate">{{ $app->user->full_name ?? '—' }}</p>
+                                <a href="/users/{{ $app->user->id }}/profile" class="text-sm font-semibold text-gray-900 hover:text-blue-700 truncate block transition">{{ $app->user->full_name ?? '—' }}</a>
                                 <p class="text-xs text-gray-400 truncate">{{ $listing?->title ?? 'Deleted listing' }} &bull; {{ $app->applied_at->diffForHumans() }}</p>
                             </div>
                         </div>

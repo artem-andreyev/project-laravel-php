@@ -34,7 +34,7 @@
                                 <span class="text-white text-sm font-bold">{{ strtoupper(substr($app->user->first_name??'?',0,1)) }}</span>
                             </div>
                             <div class="min-w-0">
-                                <p class="text-sm font-bold text-gray-900">{{ $app->user->full_name ?? '—' }}</p>
+                                <a href="/users/{{ $app->user->id }}/profile" class="text-sm font-bold text-gray-900 hover:text-blue-700 transition">{{ $app->user->full_name ?? '—' }}</a>
                                 <p class="text-xs text-gray-400 mt-0.5">
                                     {{ $listing?->title ?? 'Deleted listing' }}
                                     &bull; <span class="capitalize">{{ $app->listing_type }}</span>

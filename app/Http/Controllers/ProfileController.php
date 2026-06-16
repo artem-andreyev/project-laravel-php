@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Profile;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -62,6 +63,27 @@ class ProfileController extends Controller
         Profile::updateOrCreate(['user_id' => $user->id], $profileData);
 
         return redirect('/profile')->with('success', 'Profile updated successfully!');
+    }
+
+    public function showPublic(User $user)
+    {
+        $profile = $user->profile ?? new Profile();
+        return view('profile.public', compact('user', 'profile'));
+    }
+
+    public function downloadUserCv(User $user)
+    {
+        $profile = $user->profile;
+
+        if (!$profile || !$profile->cv_path) {
+            abort(404);
+        }
+
+        if (!Storage::disk('public')->exists($profile->cv_path)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->download($profile->cv_path);
     }
 
     public function downloadCv()

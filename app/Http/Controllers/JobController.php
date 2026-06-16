@@ -12,6 +12,10 @@ class JobController extends Controller
 {
     public function index(Request $request)
     {
+        if (auth()->check() && auth()->user()->isStudent()) {
+            return redirect('/internships')->with('error', 'Students can only access internships.');
+        }
+
         $query = Job::with('employer')->latest();
 
         if ($request->filled('search')) {
@@ -62,6 +66,9 @@ class JobController extends Controller
 
     public function show(Job $job)
     {
+        if (auth()->check() && auth()->user()->isStudent()) {
+            return redirect('/internships')->with('error', 'Students can only access internships.');
+        }
         $hasApplied = Auth::check() && Application::where('user_id', Auth::id())
             ->where('listing_type', 'job')
             ->where('listing_id', $job->id)

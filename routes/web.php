@@ -73,6 +73,10 @@ Route::get('/login', [SessionController::class, 'create']);
 Route::post('/login', [SessionController::class, 'store']);
 Route::post('/logout', [SessionController::class, 'destroy']);
 
+// Public user profile (for employers to view applicants)
+Route::middleware('auth')->get('/users/{user}/profile', [ProfileController::class, 'showPublic'])->name('users.profile');
+Route::middleware('auth')->get('/users/{user}/cv/download', [ProfileController::class, 'downloadUserCv'])->name('users.cv.download');
+
 // Auth required
 Route::middleware('auth')->group(function () {
     // Profile & CV
