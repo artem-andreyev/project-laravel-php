@@ -79,6 +79,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::get('/profile/edit', [ProfileController::class, 'edit']);
     Route::post('/profile', [ProfileController::class, 'update']);
+    Route::get('/profile/cv/download', [ProfileController::class, 'downloadCv']);
     Route::get('/cv/generate', [CvController::class, 'form']);
     Route::post('/cv/generate', [CvController::class, 'generate']);
     Route::get('/cv/saved', [CvController::class, 'saved']);

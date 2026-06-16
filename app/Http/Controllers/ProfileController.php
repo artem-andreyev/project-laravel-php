@@ -62,4 +62,19 @@ class ProfileController extends Controller
 
         return redirect('/profile')->with('success', 'Profile updated successfully!');
     }
+
+    public function downloadCv()
+    {
+        $profile = Auth::user()->profile;
+
+        if (!$profile || !$profile->cv_path) {
+            abort(404);
+        }
+
+        if (!Storage::disk('public')->exists($profile->cv_path)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->download($profile->cv_path);
+    }
 }
