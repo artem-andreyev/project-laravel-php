@@ -6,10 +6,6 @@
     <div class="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-lg">
         <h1 class="text-4xl font-extrabold mb-8 text-black text-center">{{ __('contact.heading') }}</h1>
 
-        <p class="text-lg text-gray-900 mb-12 leading-relaxed">
-            {{ __('contact.email') }}
-        </p>
-
         <section class="bg-blue-50 p-8 rounded-lg shadow-inner">
             <h2 class="text-2xl font-semibold mb-5 text-black border-b-2 border-blue-300 pb-2">
                 {{ __('contact.heading') }}
